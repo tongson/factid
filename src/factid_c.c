@@ -207,6 +207,59 @@ static int Funame(lua_State *L)
 	return 1;
 }
 
+static int Fhostid(lua_State *L)
+{
+	char hostid[9];
+	long int id = gethostid();
+	snprintf(hostid, sizeof(hostid), "%08lx", id);
+	lua_pushstring(L, hostid);
+	return 1;
+}
+
+static int Ftimezone(lua_State *L)
+{
+	struct tm time = {0};
+	char tzbuf[4];
+	setlocale(LC_TIME, "C");
+	if ((strftime(tzbuf, sizeof(tzbuf), "%Z", &time)) == 0)
+		return pusherror(L, "strftime(3) error");
+	tzbuf[sizeof(tzbuf-1)] = '\0';
+	lua_pushstring(L, tzbuf);
+	return 1;
+}
+
+static int Fmount(lua_State *L)
+{
+	struct mntent *m = {0};
+	FILE *mtab = setmntent("/etc/mtab", "r");
+	if (mtab == 0)
+		mtab = setmntent("/proc/self/mounts", "r");
+	if (mtab == 0)
+		return pusherrno(L, "setmntent(3) error");
+
+	lua_newtable(L);
+	int c;
+	for (c = 0; (m = getmntent(mtab)) != NULL; c++) {
+		lua_createtable(L, 0, 6);
+		lua_pushfstring(L, "%s", m->mnt_fsname);
+		lua_setfield(L, -2, "fsname");
+		lua_pushfstring(L, "%s", m->mnt_dir);
+		lua_setfield(L, -2, "dir");
+		lua_pushfstring(L, "%s", m->mnt_type);
+		lua_setfield(L, -2, "type");
+		lua_pushfstring(L, "%s", m->mnt_opts);
+		lua_setfield(L, -2, "opts");
+		lua_pushinteger(L, m->mnt_freq);
+		lua_setfield(L, -2, "freq");
+		lua_pushinteger(L, m->mnt_passno);
+		lua_setfield(L, -2, "passno");
+		lua_rawseti(L, -2, c+1);
+	}
+	endmntent(mtab);
+	return 1;
+}
+
+
 static const luaL_Reg syslib[] =
 {
 	{"uptime", Fuptime},

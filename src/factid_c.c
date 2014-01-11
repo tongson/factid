@@ -132,7 +132,7 @@ static int Fsysconf(lua_State *L)
 	return 1;
 }
 
-static int Fgethostname(lua_State *L)
+static int Fhostname(lua_State *L)
 {
 	char *hostname;
 	void *ud;

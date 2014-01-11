@@ -141,14 +141,13 @@ static int Fhostname(lua_State *L)
 	if (max == -1 && errno == EINVAL)
 		max = _POSIX_HOST_NAME_MAX;
 	hostname = lalloc(ud, NULL, 0, (size_t)max+1);
-	if (!hostname) {
-		lua_pushnil(L);
-		return 1;
-	}
-	if (gethostname(hostname, max) == 0) {
+	if (!hostname)
+		return pusherror(L, "Memory allocation error");
+	if (gethostname(hostname, (size_t)max) == 0) {
 		lua_pushstring(L, hostname);
 	} else {
-		lua_pushnil(L);
+		lalloc(ud, hostname, (size_t)max+1, 0);
+		return pusherrno(L, "gethostname(2) error");
 	}
 	lalloc(ud, hostname, (size_t)max+1, 0);
 	return 1;

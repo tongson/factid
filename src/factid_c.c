@@ -181,7 +181,11 @@ static int Funame(lua_State *L)
 	buf[_UTSNAME_LENGTH-1] = '\0';
 	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "release");
-	lua_pushstring(L, version);
+
+	memset(&buf, 0, _UTSNAME_LENGTH);
+	strncpy(buf, uts.version, _UTSNAME_LENGTH);
+	buf[_UTSNAME_LENGTH-1] = '\0';
+	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "version");
 	lua_pushstring(L, machine);
 	lua_setfield(L, -2, "machine");

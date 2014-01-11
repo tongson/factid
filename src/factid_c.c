@@ -169,7 +169,11 @@ static int Funame(lua_State *L)
 	buf[_UTSNAME_LENGTH-1] = '\0';
 	lua_pushstring(L, buf);
         lua_setfield(L, -2, "sysname");
-	lua_pushstring(L, nodename);
+
+	memset(&buf, 0, _UTSNAME_LENGTH);
+	strncpy(buf, uts.nodename, _UTSNAME_LENGTH);
+	buf[_UTSNAME_LENGTH-1] = '\0';
+	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "nodename");
 	lua_pushstring(L, release);
 	lua_setfield(L, -2, "release");

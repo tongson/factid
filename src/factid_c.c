@@ -155,22 +155,12 @@ static int Fhostname(lua_State *L)
 
 static int Funame(lua_State *L)
 {
-	struct utsname uts;
-	char sysnamebuf[64];
-	char nodenamebuf[255];
-	char releasebuf[64];
-	char versionbuf[255];
-	char machinebuf[32];
-	char *sysname = sysnamebuf;
-	char *nodename = nodenamebuf;
-	char *release = releasebuf;
-	char *version = versionbuf;
-	char *machine = machinebuf;
+	struct utsname uts = {0};
+	char buf[_UTSNAME_LENGTH];
+	char dbuf[_UTSNAME_DOMAIN_LENGTH];
 
-	if (uname(&uts) != 0) {
-		lua_pushnil(L);
-		return 1;
-	}
+	if (uname(&uts) == -1)
+		return pusherrno(L, "uname(2) error");
 
         lua_createtable(L, 0, 5);
 

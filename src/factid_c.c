@@ -93,7 +93,9 @@ static int Fmem(lua_State *L)
 
 static int Fprocs(lua_State *L)
 {
-	Fsysinfo(L);
+	struct sysinfo info = {0};
+	if (sysinfo(&info) != 0)
+		return pusherrno(L, "sysinfo(2) error");
 	lua_pushinteger(L, info.procs);
 	return 1;
 }

@@ -56,7 +56,10 @@ static int Floads(lua_State *L)
 
 static int Fmem(lua_State *L)
 {
-	Fsysinfo(L);
+	struct sysinfo info = {0};
+	if (sysinfo(&info) != 0)
+		return pusherrno(L, "sysinfo(2) error");
+
 	lua_createtable(L, 0, 9);
 
 	lua_pushinteger(L, info.mem_unit);

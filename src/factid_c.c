@@ -206,8 +206,11 @@ static const luaL_Reg syslib[] =
 	{"mem", Fmem},
 	{"procs", Fprocs},
 	{"sysconf", Fsysconf},
-	{"gethostname", Fgethostname},
+	{"hostname", Fhostname},
 	{"uname", Funame},
+	{"hostid", Fhostid},
+	{"timezone", Ftimezone},
+	{"mount", Fmount},
 	{NULL, NULL}
 };
 

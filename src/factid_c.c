@@ -33,7 +33,9 @@ static int pusherrno(lua_State *L, const char *error)
 
 static int Fuptime(lua_State *L)
 {
-	Fsysinfo(L);
+	struct sysinfo info = {0};
+	if (sysinfo(&info) != 0)
+		return pusherrno(L, "sysinfo(2) error");
 	lua_pushinteger(L, info.uptime);
 	return 1;
 }

@@ -5,22 +5,20 @@
 #include <sys/sysinfo.h>
 #include <sys/utsname.h>
 #include <limits.h>
+#include <time.h>
+#include <locale.h>
+#include <mntent.h>
 
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
 #include "strlcpy.h"
 
-struct sysinfo info;
-
-static int Fsysinfo(lua_State *L)
+static int pusherror(lua_State *L, const char *error)
 {
-	if (sysinfo(&info)) {
-		lua_pushnil(L);
-		lua_pushfstring(L, "Failed to get sysinfo, (%s)", strerror(errno));
-		return 2;
-	}
-	return 0;
+	lua_pushnil(L);
+	lua_pushstring(L, error);
+	return 2;
 }
 
 static int pusherrno(lua_State *L, const char *error)

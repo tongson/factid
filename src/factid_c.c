@@ -23,6 +23,13 @@ static int Fsysinfo(lua_State *L)
 	return 0;
 }
 
+static int pusherrno(lua_State *L, const char *error)
+{
+        lua_pushnil(L);
+        lua_pushfstring(L, LUA_QS" : "LUA_QS, error, strerror(errno));
+        lua_pushinteger(L, errno);
+        return 3;
+}
 
 static int Fuptime(lua_State *L)
 {

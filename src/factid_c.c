@@ -43,10 +43,12 @@ static int Fuptime(lua_State *L)
 static int Floads(lua_State *L)
 {
 	int l;
-	Fsysinfo(L);
-	lua_createtable(L, 0, 3);
+	struct sysinfo info = {0};
+	if (sysinfo(&info) != 0)
+		return pusherrno(L, "sysinfo(2) error");
+	lua_createtable(L, 3, 3);
 	for (l=0; l<3; l++) {
-		lua_pushnumber(L, info.loads[l] / 65536.);
+		lua_pushnumber(L, info.loads[l]/65536.00);
 		lua_rawseti(L, -2, l+1);
 	}
 	return 1;

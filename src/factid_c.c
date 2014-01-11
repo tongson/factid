@@ -164,18 +164,10 @@ static int Funame(lua_State *L)
 
         lua_createtable(L, 0, 5);
 
-	memset(&sysnamebuf, 0, sizeof(sysnamebuf));
-	(void)strlcpy(sysname, uts.sysname, sizeof(uts.sysname));
-	memset(&nodenamebuf, 0, sizeof(nodenamebuf));
-	(void)strlcpy(nodename, uts.nodename, sizeof(uts.nodename));
-	memset(&releasebuf, 0, sizeof(releasebuf));
-	(void)strlcpy(release, uts.release, sizeof(uts.release));
-	memset(&versionbuf, 0, sizeof(versionbuf));
-	(void)strlcpy(version, uts.version, sizeof(uts.version));
-	memset(&machinebuf, 0, sizeof(machinebuf));
-	(void)strlcpy(machine, uts.machine, sizeof(uts.machine));
-
-	lua_pushstring(L, sysname);
+	memset(&buf, 0, _UTSNAME_LENGTH);
+	strncpy(buf, uts.sysname, _UTSNAME_LENGTH);
+	buf[_UTSNAME_LENGTH-1] = '\0';
+	lua_pushstring(L, buf);
         lua_setfield(L, -2, "sysname");
 	lua_pushstring(L, nodename);
 	lua_setfield(L, -2, "nodename");

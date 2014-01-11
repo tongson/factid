@@ -194,6 +194,16 @@ static int Funame(lua_State *L)
 	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "machine");
 
+	memset(&dbuf, 0, _UTSNAME_DOMAIN_LENGTH);
+#ifdef _GNU_SOURCE
+	strncpy(dbuf, uts.domainname, _UTSNAME_DOMAIN_LENGTH);
+#else
+	strncpy(dbuf, uts.__domainname, _UTSNAME_DOMAIN_LENGTH);
+#endif
+	dbuf[_UTSNAME_DOMAIN_LENGTH-1] = '\0';
+	lua_pushstring(L, dbuf);
+	lua_setfield(L, -2, "domainname");
+
 	return 1;
 }
 

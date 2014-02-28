@@ -216,10 +216,8 @@ static int Fmount(lua_State *L)
 {
 	struct mntent *m = {0};
 	FILE *mtab = setmntent("/etc/mtab", "r");
-	if (mtab == 0)
-		mtab = setmntent("/proc/self/mounts", "r");
-	if (mtab == 0)
-		return pusherrno(L, "setmntent(3) error");
+	if (!mtab) mtab = setmntent("/proc/self/mounts", "r");
+	if (!mtab) return pusherrno(L, "setmntent(3) error");
 
 	lua_newtable(L);
 	int c;

@@ -195,8 +195,7 @@ static int Funame(lua_State *L)
 static int Fhostid(lua_State *L)
 {
 	char hostid[9];
-	long int id = gethostid();
-	snprintf(hostid, sizeof(hostid), "%08lx", id);
+	snprintf(hostid, sizeof(hostid), "%08lx", gethostid());
 	lua_pushstring(L, hostid);
 	return 1;
 }

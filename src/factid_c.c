@@ -123,12 +123,10 @@ static int Fhostname(lua_State *L)
 	void *ud;
 	lua_Alloc lalloc = lua_getallocf(L, &ud);
 	long max = sysconf(_SC_HOST_NAME_MAX);
-	if (max == -1 && errno == EINVAL)
-		max = _POSIX_HOST_NAME_MAX;
+	if (max == -1 && errno == EINVAL) max = _POSIX_HOST_NAME_MAX;
 	hostname = lalloc(ud, NULL, 0, (size_t)max+1);
-	if (!hostname)
-		return pusherror(L, "Memory allocation error");
-	if (gethostname(hostname, (size_t)max) == 0) {
+	if (!hostname) return pusherror(L, "Memory allocation error");
+	if (!gethostname(hostname, (size_t)max)) {
 		lua_pushstring(L, hostname);
 	} else {
 		lalloc(ud, hostname, (size_t)max+1, 0);

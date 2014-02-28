@@ -128,7 +128,7 @@ static int Fhostname(lua_State *L)
 	lua_Alloc lalloc = lua_getallocf(L, &ud);
 	long max = sysconf(_SC_HOST_NAME_MAX);
 	if (max == -1 && errno == EINVAL) max = _POSIX_HOST_NAME_MAX;
-	hostname = lalloc(ud, 0, 0, (size_t)max+1);
+	hostname = lalloc(ud, (void *)0, 0, (size_t)max+1);
 	if (!hostname) return pusherror(L, "Memory allocation error");
 	if (!gethostname(hostname, (size_t)max)) {
 		lua_pushstring(L, hostname);
@@ -220,10 +220,10 @@ static int Fmount(lua_State *L)
 
 	if (!mtab) mtab = setmntent("/proc/self/mounts", "r");
 	if (!mtab) return pusherrno(L, "setmntent(3) error");
-	if (setvbuf(mtab, 0, _IONBF, 0)) return pusherrno(L, "setvbuf(3) error");
+	if (setvbuf(mtab, (void *)0, _IONBF, 0)) return pusherrno(L, "setvbuf(3) error");
 	lua_newtable(L);
 	int c;
-	for (c = 0; (m = getmntent(mtab)) != 0; c++) {
+	for (c = 0; (m = getmntent(mtab)) != NULL; c++) {
 		lua_createtable(L, 0, 6);
 		lua_pushfstring(L, "%s", m->mnt_fsname);
 		lua_setfield(L, -2, "fsname");
@@ -316,7 +316,7 @@ static const luaL_Reg syslib[] =
 	{"timezone", Ftimezone},
 	{"mount", Fmount},
 	{"ipaddress", Fipaddress},
-	{0, 0}
+	{(void *)0, (void *)0}
 };
 
 LUALIB_API int luaopen_factid_c(lua_State *L)

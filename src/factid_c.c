@@ -219,9 +219,8 @@ static int Ftimezone(lua_State *L)
 	struct tm time = {0};
 	char tzbuf[4];
 	setlocale(LC_TIME, "C");
-	if ((strftime(tzbuf, sizeof(tzbuf), "%Z", &time)) == 0)
+	if ((strftime(tzbuf, sizeof(tzbuf-1), "%Z", &time)) == 0)
 		return pusherror(L, "strftime(3) error");
-	tzbuf[sizeof(tzbuf-1)] = '\0';
 	lua_pushstring(L, tzbuf);
 	return 1;
 }

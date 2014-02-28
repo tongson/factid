@@ -8,6 +8,10 @@
 #include <time.h>
 #include <locale.h>
 #include <mntent.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -239,6 +243,65 @@ static int Fmount(lua_State *L)
 	return 1;
 }
 
+static int Fipaddress(lua_State *L)
+{
+	int fd4, fd6, c;
+	char ipv6[INET6_ADDRSTRLEN];
+	struct sockaddr_in l4 = {0}, r4 = {0}, ip4 = {0};
+	struct sockaddr_in6 l6 = {0}, r6 = {0}, ip6 = {0};
+	socklen_t ip4len = sizeof(ip4);
+	socklen_t ip6len = sizeof(ip6);
+
+	l4.sin_family = AF_INET;
+	l4.sin_port = htons(0);
+	l4.sin_addr.s_addr = htonl(INADDR_ANY);
+	r4.sin_family = AF_INET;
+	r4.sin_port = htons(40444);
+	r4.sin_addr.s_addr = inet_addr("8.8.8.8");
+
+	l6.sin6_family = AF_INET6;
+	l6.sin6_port = htons(0);
+	l6.sin6_addr = in6addr_any;
+	r6.sin6_family = AF_INET6;
+	r6.sin6_port = htons(40666);
+	inet_pton(AF_INET6, "2001:4860:4860::8888", &r6.sin6_addr);
+
+	lua_createtable(L, 0, 2);
+
+	if ((fd4 = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+		return pusherrno(L, "socket(2) error");
+	for (c = 0; c < 3; c++) {
+		if (!connect(fd4, (struct sockaddr *)&r4, sizeof(r4))) break;
+		if (c == 3) {
+			r4.sin_addr.s_addr = inet_addr("127.0.0.1");
+			if (connect(fd4, (struct sockaddr *)&r4, sizeof(r4)) == -1)
+				return pusherrno(L, "connect(2) error");
+		}
+	}
+	if (getsockname(fd4, (struct sockaddr *)&ip4, &ip4len) == -1)
+		return pusherrno(L, "getsockname(2) error");
+	shutdown(fd4, 2);
+	lua_pushstring(L, inet_ntoa(ip4.sin_addr));
+        lua_setfield(L, -2, "ipv4");
+
+	if ((fd6 = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+		return pusherrno(L, "socket(2) error");
+	for (c = 0; c < 3; c++) {
+		if (!connect(fd6, (struct sockaddr *)&r6, sizeof(r6))) break;
+		if (c == 3) {
+			inet_pton(AF_INET6, "::1", &r6.sin6_addr);
+			if (connect(fd6, (struct sockaddr *)&r6, sizeof(r6)) == -1)
+				return pusherrno(L, "connect(2) error");
+		}
+	}
+	if (getsockname(fd6, (struct sockaddr *)&ip6, &ip6len) == -1)
+		return pusherrno(L, "getsockname(2) error");
+	shutdown(fd6, 2);
+	inet_ntop(AF_INET6, &ip6.sin6_addr, ipv6, INET6_ADDRSTRLEN-1);
+	lua_pushstring(L, ipv6);
+        lua_setfield(L, -2, "ipv6");
+	return 1;
+}
 
 static const luaL_Reg syslib[] =
 {
@@ -252,6 +315,7 @@ static const luaL_Reg syslib[] =
 	{"hostid", Fhostid},
 	{"timezone", Ftimezone},
 	{"mount", Fmount},
+	{"ipaddress", Fipaddress},
 	{NULL, NULL}
 };
 

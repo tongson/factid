@@ -14,14 +14,14 @@
 #include "lualib.h"
 #include "strlcpy.h"
 
-static int pusherror(lua_State *L, const char *error)
+static int pusherror(lua_State *L, char *error)
 {
 	lua_pushnil(L);
 	lua_pushstring(L, error);
 	return 2;
 }
 
-static int pusherrno(lua_State *L, const char *error)
+static int pusherrno(lua_State *L, char *error)
 {
         lua_pushnil(L);
         lua_pushfstring(L, LUA_QS" : "LUA_QS, error, strerror(errno));

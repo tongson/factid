@@ -16,7 +16,6 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include "strlcpy.h"
 
 static int pusherror(lua_State *L, char *error)
 {

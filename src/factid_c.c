@@ -270,7 +270,7 @@ static int Fipaddress(lua_State *L)
 
 	if ((fd4 = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 		return pusherrno(L, "socket(2) error");
-	for (c = 0; c < 3; c++) {
+	for (c = 0; c <= 3; c++) {
 		if (!connect(fd4, (struct sockaddr *)&r4, sizeof(r4))) break;
 		if (c == 3) {
 			r4.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -286,7 +286,7 @@ static int Fipaddress(lua_State *L)
 
 	if ((fd6 = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 		return pusherrno(L, "socket(2) error");
-	for (c = 0; c < 3; c++) {
+	for (c = 0; c <= 3; c++) {
 		if (!connect(fd6, (struct sockaddr *)&r6, sizeof(r6))) break;
 		if (c == 3) {
 			inet_pton(AF_INET6, "::1", &r6.sin6_addr);

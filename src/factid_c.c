@@ -215,6 +215,7 @@ static int Ftimezone(lua_State *L)
 
 static int Fmount(lua_State *L)
 {
+	int c;
 	struct mntent *m = {0};
 	FILE *mtab = setmntent("/etc/mtab", "r");
 
@@ -222,8 +223,7 @@ static int Fmount(lua_State *L)
 	if (!mtab) return pusherrno(L, "setmntent(3) error");
 	if (setvbuf(mtab, (void *)0, _IONBF, 0)) return pusherrno(L, "setvbuf(3) error");
 	lua_newtable(L);
-	int c;
-	for (c = 0; (m = getmntent(mtab)) != NULL; c++) {
+	for (c = 0; (m = getmntent(mtab)) != 0; c++) {
 		lua_createtable(L, 0, 6);
 		lua_pushfstring(L, "%s", m->mnt_fsname);
 		lua_setfield(L, -2, "fsname");

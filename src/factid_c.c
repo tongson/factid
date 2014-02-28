@@ -32,8 +32,7 @@ static int pusherrno(lua_State *L, const char *error)
 static int Fuptime(lua_State *L)
 {
 	struct sysinfo info = {0};
-	if (sysinfo(&info) != 0)
-		return pusherrno(L, "sysinfo(2) error");
+	if (sysinfo(&info) != 0) return pusherrno(L, "sysinfo(2) error");
 	lua_pushinteger(L, info.uptime);
 	return 1;
 }
@@ -42,8 +41,7 @@ static int Floads(lua_State *L)
 {
 	int l;
 	struct sysinfo info = {0};
-	if (sysinfo(&info) != 0)
-		return pusherrno(L, "sysinfo(2) error");
+	if (sysinfo(&info) == -1) return pusherrno(L, "sysinfo(2) error");
 	lua_createtable(L, 3, 3);
 	for (l=0; l<3; l++) {
 		lua_pushnumber(L, info.loads[l]/65536.00);
@@ -55,8 +53,7 @@ static int Floads(lua_State *L)
 static int Fmem(lua_State *L)
 {
 	struct sysinfo info = {0};
-	if (sysinfo(&info) != 0)
-		return pusherrno(L, "sysinfo(2) error");
+	if (sysinfo(&info) == -1) return pusherrno(L, "sysinfo(2) error");
 
 	lua_createtable(L, 0, 9);
 
@@ -92,8 +89,7 @@ static int Fmem(lua_State *L)
 static int Fprocs(lua_State *L)
 {
 	struct sysinfo info = {0};
-	if (sysinfo(&info) != 0)
-		return pusherrno(L, "sysinfo(2) error");
+	if (sysinfo(&info) == -1) return pusherrno(L, "sysinfo(2) error");
 	lua_pushinteger(L, info.procs);
 	return 1;
 }

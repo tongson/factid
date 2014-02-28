@@ -303,7 +303,7 @@ static int Fipaddress(lua_State *L)
 	return 1;
 }
 
-static const luaL_Reg syslib[] =
+static const luaL_Reg F[] =
 {
 	{"uptime", Fuptime},
 	{"loads", Floads},
@@ -321,7 +321,7 @@ static const luaL_Reg syslib[] =
 
 LUALIB_API int luaopen_factid_c(lua_State *L)
 {
-	luaL_newlib(L, syslib);
+	luaL_newlib(L, F);
 	return 1;
 }
 

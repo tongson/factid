@@ -213,9 +213,10 @@ static int Fmount(lua_State *L)
 {
 	struct mntent *m = {0};
 	FILE *mtab = setmntent("/etc/mtab", "r");
+
 	if (!mtab) mtab = setmntent("/proc/self/mounts", "r");
 	if (!mtab) return pusherrno(L, "setmntent(3) error");
-
+	if (setvbuf(mtab, NULL, _IONBF, 0)) return pusherrno(L, "setvbuf(3) error");
 	lua_newtable(L);
 	int c;
 	for (c = 0; (m = getmntent(mtab)) != NULL; c++) {

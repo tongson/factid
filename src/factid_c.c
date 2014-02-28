@@ -96,33 +96,24 @@ static int Fprocs(lua_State *L)
 
 static int Fsysconf(lua_State *L)
 {
-	long openmax = sysconf(_SC_OPEN_MAX);
-	long procs = sysconf(_SC_NPROCESSORS_CONF);
-	long procsonline = sysconf(_SC_NPROCESSORS_ONLN);
-	long pagesize = sysconf(_SC_PAGESIZE);
-	long physpages = sysconf(_SC_PHYS_PAGES);
-	long avphyspages = sysconf(_SC_AVPHYS_PAGES);
+	struct {
+		char *name;
+		long sc;
+	} m[] = {
+		{"openmax", sysconf(_SC_OPEN_MAX)},
+		{"procs", sysconf(_SC_NPROCESSORS_CONF)},
+		{"procsonline", sysconf(_SC_NPROCESSORS_ONLN)},
+		{"pagesize", sysconf(_SC_PAGESIZE)},
+		{"physpages", sysconf(_SC_PHYS_PAGES)},
+		{"avphyspages", sysconf(_SC_AVPHYS_PAGES)}
+	};
 
 	lua_createtable(L, 0, 6);
-
-	lua_pushnumber(L, openmax);
-	lua_setfield(L, -2, "openmax");
-
-	lua_pushnumber(L, procs);
-	lua_setfield(L, -2, "procs");
-
-	lua_pushnumber(L, procsonline);
-	lua_setfield(L, -2, "procsonline");
-
-	lua_pushnumber(L, pagesize);
-	lua_setfield(L, -2, "pagesize");
-
-	lua_pushnumber(L, physpages);
-	lua_setfield(L, -2, "physpages");
-
-	lua_pushnumber(L, avphyspages);
-	lua_setfield(L, -2, "avphyspages");
-
+	int c;
+        for (c=0; c<sizeof(m)/sizeof(*m); c++) {
+		lua_pushnumber(L, m[c].sc);
+		lua_setfield(L, -2, m[c].name);
+	}
 	return 1;
 }
 

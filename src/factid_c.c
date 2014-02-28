@@ -316,7 +316,7 @@ static const luaL_Reg F[] =
 	{"timezone", Ftimezone},
 	{"mount", Fmount},
 	{"ipaddress", Fipaddress},
-	{(void *)0, (void *)0}
+	{NULL, NULL}
 };
 
 LUALIB_API int luaopen_factid_c(lua_State *L)

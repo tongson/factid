@@ -246,6 +246,7 @@ static int Fipaddress(lua_State *L)
 {
 	int fd4, fd6, c;
 	char ipv6[INET6_ADDRSTRLEN];
+	char ipv4[INET_ADDRSTRLEN];
 	struct sockaddr_in l4 = {0}, r4 = {0}, ip4 = {0};
 	struct sockaddr_in6 l6 = {0}, r6 = {0}, ip6 = {0};
 	socklen_t ip4len = sizeof(ip4);
@@ -256,7 +257,7 @@ static int Fipaddress(lua_State *L)
 	l4.sin_addr.s_addr = htonl(INADDR_ANY);
 	r4.sin_family = AF_INET;
 	r4.sin_port = htons(40444);
-	r4.sin_addr.s_addr = inet_addr("8.8.8.8");
+	inet_pton(AF_INET, "8.8.8.8", &r4.sin_addr.s_addr);
 
 	l6.sin6_family = AF_INET6;
 	l6.sin6_port = htons(0);
@@ -272,7 +273,7 @@ static int Fipaddress(lua_State *L)
 	for (c = 0; c <= 3; c++) {
 		if (!connect(fd4, (struct sockaddr *)&r4, sizeof(r4))) break;
 		if (c == 3) {
-			r4.sin_addr.s_addr = inet_addr("127.0.0.1");
+			inet_pton(AF_INET, "127.0.0.1", &r4.sin_addr.s_addr);
 			if (connect(fd4, (struct sockaddr *)&r4, sizeof(r4)) == -1)
 				return pusherrno(L, "connect(2) error");
 		}
@@ -280,7 +281,8 @@ static int Fipaddress(lua_State *L)
 	if (getsockname(fd4, (struct sockaddr *)&ip4, &ip4len) == -1)
 		return pusherrno(L, "getsockname(2) error");
 	shutdown(fd4, 2);
-	lua_pushstring(L, inet_ntoa(ip4.sin_addr));
+	inet_ntop(AF_INET, &ip4.sin_addr, ipv4, INET_ADDRSTRLEN-1);
+	lua_pushstring(L, ipv4);
         lua_setfield(L, -2, "ipv4");
 
 	if ((fd6 = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP)) == -1)

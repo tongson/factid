@@ -282,7 +282,7 @@ static int Fipaddress(lua_State *L)
 	if (getsockname(fd4, (struct sockaddr *)&ip4, &ip4len) == -1)
 		return pusherrno(L, "getsockname(2) error");
 	shutdown(fd4, 2);
-	inet_ntop(AF_INET, &ip4.sin_addr, ipv4, INET_ADDRSTRLEN-1);
+	inet_ntop(AF_INET, &ip4.sin_addr, ipv4, INET_ADDRSTRLEN);
 	lua_pushstring(L, ipv4);
         lua_setfield(L, -2, "ipv4");
 
@@ -299,7 +299,7 @@ static int Fipaddress(lua_State *L)
 	if (getsockname(fd6, (struct sockaddr *)&ip6, &ip6len) == -1)
 		return pusherrno(L, "getsockname(2) error");
 	shutdown(fd6, 2);
-	inet_ntop(AF_INET6, &ip6.sin6_addr, ipv6, INET6_ADDRSTRLEN-1);
+	inet_ntop(AF_INET6, &ip6.sin6_addr, ipv6, INET6_ADDRSTRLEN);
 	lua_pushstring(L, ipv6);
         lua_setfield(L, -2, "ipv6");
 	return 1;

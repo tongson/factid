@@ -114,7 +114,7 @@ static int Fsysconf(lua_State *L)
 
 	lua_createtable(L, 0, 6);
 	int c;
-        for (c=0; c<sizeof(m)/sizeof(*m); c++) {
+        for (c=0; c<sizeof m/sizeof *m; c++) {
 		lua_pushnumber(L, m[c].sc);
 		lua_setfield(L, -2, m[c].name);
 	}
@@ -197,7 +197,7 @@ static int Funame(lua_State *L)
 static int Fhostid(lua_State *L)
 {
 	char hostid[9];
-	snprintf(hostid, sizeof(hostid), "%08lx", gethostid());
+	snprintf(hostid, sizeof hostid, "%08lx", gethostid());
 	lua_pushstring(L, hostid);
 	return 1;
 }
@@ -207,7 +207,7 @@ static int Ftimezone(lua_State *L)
 	struct tm time = {0};
 	char tzbuf[4];
 	setlocale(LC_TIME, "C");
-	if ((strftime(tzbuf, sizeof(tzbuf-1), "%Z", &time)) == 0)
+	if ((strftime(tzbuf, sizeof (tzbuf-1), "%Z", &time)) == 0)
 		return pusherror(L, "strftime(3) error");
 	lua_pushstring(L, tzbuf);
 	return 1;
@@ -250,8 +250,8 @@ static int Fipaddress(lua_State *L)
 	char ipv4[INET_ADDRSTRLEN];
 	struct sockaddr_in l4 = {0}, r4 = {0}, ip4 = {0};
 	struct sockaddr_in6 l6 = {0}, r6 = {0}, ip6 = {0};
-	socklen_t ip4len = sizeof(ip4);
-	socklen_t ip6len = sizeof(ip6);
+	socklen_t ip4len = sizeof ip4;
+	socklen_t ip6len = sizeof ip6;
 
 	l4.sin_family = AF_INET;
 	l4.sin_port = htons(0);
@@ -272,10 +272,10 @@ static int Fipaddress(lua_State *L)
 	if ((fd4 = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 		return pusherrno(L, "socket(2) error");
 	for (c = 0; c <= 3; c++) {
-		if (!connect(fd4, (struct sockaddr *)&r4, sizeof(r4))) break;
+		if (!connect(fd4, (struct sockaddr *)&r4, sizeof r4)) break;
 		if (c == 3) {
 			inet_pton(AF_INET, "127.0.0.1", &r4.sin_addr.s_addr);
-			if (connect(fd4, (struct sockaddr *)&r4, sizeof(r4)) == -1)
+			if (connect(fd4, (struct sockaddr *)&r4, sizeof r4) == -1)
 				return pusherrno(L, "connect(2) error");
 		}
 	}
@@ -289,10 +289,10 @@ static int Fipaddress(lua_State *L)
 	if ((fd6 = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 		return pusherrno(L, "socket(2) error");
 	for (c = 0; c <= 3; c++) {
-		if (!connect(fd6, (struct sockaddr *)&r6, sizeof(r6))) break;
+		if (!connect(fd6, (struct sockaddr *)&r6, sizeof r6)) break;
 		if (c == 3) {
 			inet_pton(AF_INET6, "::1", &r6.sin6_addr);
-			if (connect(fd6, (struct sockaddr *)&r6, sizeof(r6)) == -1)
+			if (connect(fd6, (struct sockaddr *)&r6, sizeof r6) == -1)
 				return pusherrno(L, "connect(2) error");
 		}
 	}

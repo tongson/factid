@@ -12,6 +12,7 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <ifaddrs.h>
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -304,6 +305,54 @@ static int Fipaddress(lua_State *L)
 	return 1;
 }
 
+static int ipaddr(lua_State *L, struct ifaddrs *i)
+{
+	char ipv4[INET_ADDRSTRLEN];
+	char ipv6[INET6_ADDRSTRLEN];
+	void *ip = 0;
+
+	lua_pushstring(L, i->ifa_name);
+	lua_setfield(L, -2, "name");
+
+	if (i->ifa_addr->sa_family == AF_INET) {
+		ip = &((struct sockaddr_in *)i->ifa_addr)->sin_addr;
+		inet_ntop(AF_INET, ip, ipv4, INET_ADDRSTRLEN);
+		lua_pushstring(L, ipv4);
+		lua_setfield(L, -2, "ipv4");
+	}
+	if (i->ifa_addr->sa_family == AF_INET6) {
+		ip = &((struct sockaddr_in6 *)i->ifa_addr)->sin6_addr;
+		inet_ntop(AF_INET6, ip, ipv6, INET6_ADDRSTRLEN);
+		lua_pushstring(L, ipv6);
+		lua_setfield(L, -2, "ipv6");
+	}
+	return 2;
+}
+
+static int Fifaddrs(lua_State *L)
+{
+	struct ifaddrs *ifaddr = {0};
+	struct ifaddrs *i = {0};
+	int c = 1;
+
+	if (getifaddrs(&ifaddr) == -1) {
+		return pusherrno(L, "getifaddrs(3) error");
+	}
+
+	lua_createtable(L, 1, 0);
+	for (i = ifaddr; i; i = i->ifa_next) {
+		lua_newtable(L);
+		if ((i->ifa_addr->sa_family == AF_INET) ||
+		    (i->ifa_addr->sa_family == AF_INET6)) {
+			ipaddr(L, i);
+			lua_rawseti(L, -2, c++);
+		}
+	}
+
+	freeifaddrs(ifaddr);
+	return 1;
+}
+
 static const luaL_Reg F[] =
 {
 	{"uptime", Fuptime},
@@ -317,6 +366,7 @@ static const luaL_Reg F[] =
 	{"timezone", Ftimezone},
 	{"mount", Fmount},
 	{"ipaddress", Fipaddress},
+	{"ifaddrs", Fifaddrs},
 	{NULL, NULL}
 };
 

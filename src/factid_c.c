@@ -47,10 +47,10 @@ static int Floads(lua_State *L)
 	int l;
 	struct sysinfo info = {0};
 	if (sysinfo(&info) == -1) return pusherrno(L, "sysinfo(2) error");
-	lua_createtable(L, 3, 3);
+	lua_createtable(L, 3, 0);
 	for (l=0; l<3; l++) {
 		lua_pushnumber(L, info.loads[l]/65536.00);
-		lua_rawseti(L, -2, l+1);
+		lua_rawseti(L, -2, l++);
 	}
 	return 1;
 }
@@ -125,7 +125,7 @@ static int Fsysconf(lua_State *L)
 static int Fhostname(lua_State *L)
 {
 	char *hostname;
-	void *ud;
+	void *ud = 0;
 	lua_Alloc lalloc = lua_getallocf(L, &ud);
 	long max = sysconf(_SC_HOST_NAME_MAX);
 	if (max == -1 && errno == EINVAL) max = _POSIX_HOST_NAME_MAX;
@@ -150,7 +150,7 @@ static int Funame(lua_State *L)
 	if (uname(&uts) == -1)
 		return pusherrno(L, "uname(2) error");
 
-        lua_createtable(L, 0, 5);
+        lua_createtable(L, 0, 6);
 
 	memset(&buf, 0, _UTSNAME_LENGTH);
 	strncpy(buf, uts.sysname, _UTSNAME_LENGTH);
@@ -238,7 +238,7 @@ static int Fmount(lua_State *L)
 		lua_setfield(L, -2, "freq");
 		lua_pushinteger(L, m->mnt_passno);
 		lua_setfield(L, -2, "passno");
-		lua_rawseti(L, -2, c+1);
+		lua_rawseti(L, -2, c++);
 	}
 	endmntent(mtab);
 	return 1;

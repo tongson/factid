@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <ifaddrs.h>
+#include <utmpx.h>
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -353,6 +354,31 @@ static int Fifaddrs(lua_State *L)
 	return 1;
 }
 
+static int Futx(lua_State *L)
+{
+	struct utmpx *utx = {0};
+	setutxent();
+	lua_createtable(L, 0, 7);
+	while (utx = getutxent()) {
+		lua_pushstring(L, utx->ut_user);
+		lua_setfield(L, -2, "user");
+		lua_pushstring(L, utx->ut_line);
+		lua_setfield(L, -2, "tty");
+		lua_pushstring(L, utx->ut_host);
+		lua_setfield(L, -2, "hostname");
+		lua_pushnumber(L, (float)utx->ut_tv.tv_sec);
+		lua_setfield(L, -2, "timestamp");
+		lua_pushboolean(L, utx->ut_type & USER_PROCESS);
+		lua_setfield(L, -2, "user_process");
+		lua_pushboolean(L, utx->ut_type & INIT_PROCESS);
+		lua_setfield(L, -2, "init_process");
+		lua_pushboolean(L, utx->ut_type & LOGIN_PROCESS);
+		lua_setfield(L, -2, "login_process");
+	}
+	endutxent();
+	return 1;
+}
+
 static const luaL_Reg F[] =
 {
 	{"uptime", Fuptime},
@@ -367,6 +393,7 @@ static const luaL_Reg F[] =
 	{"mount", Fmount},
 	{"ipaddress", Fipaddress},
 	{"ifaddrs", Fifaddrs},
+	{"utx", Futx},
 	{NULL, NULL}
 };
 
